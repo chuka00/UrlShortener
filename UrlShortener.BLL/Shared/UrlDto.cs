@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace UrlShortener.BLL.Shared
 {
-    internal class UrlDto
+    public class UrlDto
     {
+        public string Url { get; set; } = "";
     }
 }

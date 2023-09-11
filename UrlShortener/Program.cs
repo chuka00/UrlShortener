@@ -1,6 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
+using UrlShortener.BLL.Shared;
 using UrlShortener.DAL.Data;
+using UrlShortener.DAL.Entities;
 
 namespace UrlShortener
 {
@@ -32,6 +34,36 @@ namespace UrlShortener
             }
 
             app.UseHttpsRedirection();
+
+            app.MapPost("/shorturl", async (UrlDto url, AppDbContext db, HttpContext ctx) =>
+            {
+                //Validating the input url
+                if (!Uri.TryCreate(url.Url, UriKind.Absolute, out var inputUrl))
+                    return Results.BadRequest(error: "Invalid Url has been provided");
+
+                //Creating a short version of the provided url
+                var random = new Random();
+                const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@#";
+                var randomStr = new string(Enumerable.Repeat(chars, 8)
+                    .Select(s => s[random.Next(s.Length)]).ToArray());
+
+               
+                var sUrl = new UrlManagement()
+                {
+                    Url = url.Url,
+                    ShortUrl = randomStr
+                };
+
+                db.Urls.Add(sUrl);
+                db.SaveChangesAsync();
+
+                //construct url
+                var result = $"{ctx.Request.Scheme}://{ctx.Request.Host}/ {sUrl.ShortUrl}";
+                return Results.Ok(new UrlShortResponseDto()
+                {
+                    Url = result
+                });
+            });
 
             app.UseAuthorization();
 

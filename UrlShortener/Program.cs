@@ -58,7 +58,7 @@ namespace UrlShortener
                 db.SaveChangesAsync();
 
                 //construct url
-                var result = $"{ctx.Request.Scheme}://{ctx.Request.Host}/ {sUrl.ShortUrl}";
+                var result = $"{ctx.Request.Scheme}://{ctx.Request.Host}/{sUrl.ShortUrl}";
                 return Results.Ok(new UrlShortResponseDto()
                 {
                     Url = result
@@ -73,6 +73,13 @@ namespace UrlShortener
             app.MapFallback(async (AppDbContext db, HttpContext ctx) =>
             {
                 var path = ctx.Request.Path.ToUriComponent().Trim('/');
+                var urlMatch = await db.Urls.FirstOrDefaultAsync(x => 
+                x.ShortUrl.Trim() == path.Trim());
+
+                if (urlMatch == null)
+                    return Results.BadRequest("Invalid request");
+
+                return Results.Redirect(urlMatch.Url);
             });
 
             app.Run();

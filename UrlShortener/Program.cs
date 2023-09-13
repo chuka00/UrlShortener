@@ -70,6 +70,11 @@ namespace UrlShortener
 
             app.MapControllers();
 
+            app.MapFallback(async (AppDbContext db, HttpContext ctx) =>
+            {
+                var path = ctx.Request.Path.ToUriComponent().Trim('/');
+            });
+
             app.Run();
         }
     }

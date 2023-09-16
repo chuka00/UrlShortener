@@ -33,7 +33,7 @@ namespace UrlShortener
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            app.UseHttpsRedirection(); 
 
             app.MapPost("/shorturl", async (UrlDto url, AppDbContext db, HttpContext ctx) =>
             {
